@@ -4,7 +4,7 @@ export interface regDetails {
         last_Name: string,
         "father_Name": string,
         DOB: string,
-        "marital status": {
+        "marital_status": {
             married: boolean,
             unmarried: boolean
         },

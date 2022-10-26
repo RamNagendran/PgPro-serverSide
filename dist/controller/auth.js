@@ -34,7 +34,7 @@ function verifyToken(token) {
 }
 exports.verifyToken = verifyToken;
 function authorize(req, res, next) {
-    const authHeader = req.body.headers.authorization;
+    const authHeader = req.headers.authorization || req.body.headers.authorization;
     if (!authHeader) {
         return res.status(401).json({
             error: 'No authorization header'

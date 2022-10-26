@@ -1,31 +1,24 @@
-import Express from "express";
-// import {authorize} from "./controller/auth";
-import {newRegisteration} from "./db";
+import express from "express";
+import {getRegisteredUser, newRegisteration} from "./db";
 import cors from 'cors';
 import dotenv, {parse} from 'dotenv';
-import {authorize, generateToken} from "./controller/auth";
+import {authorize} from "./controller/auth";
+import {getAllUsers, registeration, tokenGenerate, updateRentStatus} from "./functions";
 
-
-
-// to load env file
 dotenv.config();
 
-const app = Express();
+const app = express();
 app.use(cors())
-app.use(Express.json());
+app.use(express.json());
 
+// ---------------------------------------------------------------||
 
-app.post("/auth", async (req: any, res: any) => {
-    let token = generateToken({userId: req.userId})
-    res.json(token)
-});
+app.post("/auth", tokenGenerate);
+app.post("/register/newUser", authorize, registeration)
+app.get("/getallUser", authorize, getAllUsers)
+app.post("/update/rentStatus", authorize, updateRentStatus)
 
-app.post("/register/newUser", authorize, async (req: any, res: any) => {
-    let registered = await newRegisteration(req.body.value)
-    res.json(registered);
-})
-
-
+// ----------------------------------------------------------------||
 app.listen(5000, () => {
     console.log("universe listening on port 5000");
 })

@@ -10,8 +10,8 @@ export function verifyToken(token: string) {
 }
 
 export function authorize(req: Request, res: Response, next: NextFunction) {
-
-    const authHeader = req.body.headers.authorization;
+    
+    const authHeader = req.headers.authorization || req.body.headers.authorization;
 
     if (!authHeader) {
         return res.status(401).json({
