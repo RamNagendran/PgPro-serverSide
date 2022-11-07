@@ -50,7 +50,7 @@ function newRegisteration(data) {
         email_id, 
         photo_obj) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING *`, [id, (_b = data === null || data === void 0 ? void 0 : data.personal_info) === null || _b === void 0 ? void 0 : _b.first_Name, (_c = data === null || data === void 0 ? void 0 : data.personal_info) === null || _c === void 0 ? void 0 : _c.last_Name, data === null || data === void 0 ? void 0 : data.personal_info['father_Name'], (_d = data === null || data === void 0 ? void 0 : data.personal_info) === null || _d === void 0 ? void 0 : _d.DOB, data === null || data === void 0 ? void 0 : data.personal_info['marital_status'], address, (_e = data === null || data === void 0 ? void 0 : data.contact_details) === null || _e === void 0 ? void 0 : _e.emergency_contactNo, data === null || data === void 0 ? void 0 : data.professional_info, (_f = data === null || data === void 0 ? void 0 : data.documentation) === null || _f === void 0 ? void 0 : _f.adhar_no, uploadedId_proofs, (_g = data === null || data === void 0 ? void 0 : data.documentation) === null || _g === void 0 ? void 0 : _g.signData, (_h = data === null || data === void 0 ? void 0 : data.personal_info) === null || _h === void 0 ? void 0 : _h.joining_date, (_j = data === null || data === void 0 ? void 0 : data.personal_info) === null || _j === void 0 ? void 0 : _j.room_no, (_k = data === null || data === void 0 ? void 0 : data.contact_details) === null || _k === void 0 ? void 0 : _k.phone_no, (_l = data === null || data === void 0 ? void 0 : data.contact_details) === null || _l === void 0 ? void 0 : _l.email_id, (_m = data === null || data === void 0 ? void 0 : data.personal_info) === null || _m === void 0 ? void 0 : _m.uploadedImg
             ]);
-            let rent_status_id_update = pool.query(`INSERT INTO rent_status (user_id) VALUES ($1) RETURNING *`, [id]);
+            let rent_status_id_update = pool.query(`INSERT INTO rent_status (user_id, monthly_rent_details) VALUES ($1, $2) RETURNING *`, [id, []]);
             return result.rows;
         }
         catch (err) {
@@ -137,10 +137,15 @@ exports.updateUser = updateUser;
 function insertRentStatus(value) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            console.log(value);
             const result1 = yield pool.query(`UPDATE register_info set rent_status=($1) WHERE id=($2)`, [value === null || value === void 0 ? void 0 : value.status, value === null || value === void 0 ? void 0 : value.id]);
-            const result2 = yield pool.query(`INSERT INTO rent_status (monthly_rent_details) WHERE user_id=($1)`, [value === null || value === void 0 ? void 0 : value.id]);
-            const result3 = yield pool.query(`UPDATE rent_status set balance_amt=($1) WHERE user_id=($2)`, [value === null || value === void 0 ? void 0 : value.balance_amt, value === null || value === void 0 ? void 0 : value.id]);
+            let monthdata = value === null || value === void 0 ? void 0 : value.monthly_update;
+            console.log("month data", monthdata);
+            const result3 = yield pool.query(`
+            UPDATE rent_status set monthly_rent_details = monthly_rent_details || {"Month": "Nov 2022", "Status": "Paid"}::jsonb WHERE user_id=($1)`, [
+                value === null || value === void 0 ? void 0 : value.id
+                // value?.balance_amt,
+            ]);
+            console.log("res", result3);
             return result1.rows;
         }
         catch (err) {

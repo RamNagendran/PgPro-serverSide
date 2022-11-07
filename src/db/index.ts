@@ -57,7 +57,7 @@ export async function newRegisteration(data: regDetails) {
                 data?.contact_details?.email_id,
                 data?.personal_info?.uploadedImg
             ]);
-        let rent_status_id_update = pool.query(`INSERT INTO rent_status (user_id) VALUES ($1) RETURNING *`, [id])
+        let rent_status_id_update = pool.query(`INSERT INTO rent_status (user_id, monthly_rent_details) VALUES ($1, $2) RETURNING *`, [id, []])
         return result.rows;
     } catch (err) {
         console.log("================>", err)
@@ -135,15 +135,13 @@ export async function updateUser(value: any) {
 
 export async function insertRentStatus(value: any) {
     try {
-        console.log(value)
         const result1 = await pool.query(`UPDATE register_info set rent_status=($1) WHERE id=($2)`, [value?.status, value?.id])
+        let monthdata = value?.monthly_update
         const result3 = await pool.query(`
-            UPDATE rent_status  set 
-            monthly_rent_details= monthly_rent_details || ('[$1]')::jsonb, 
-            balance_amt=($2) 
-            WHERE user_id=($3)`,
+            UPDATE rent_status set balance_amt=($1), 
+            monthly_rent_details = monthly_rent_details || '{"Month": "${monthdata?.month}", "Status": "Paid"}'::jsonb 
+            WHERE user_id=($2)`,
             [
-                value?.monthly_update,
                 value?.balance_amt,
                 value?.id
             ]
