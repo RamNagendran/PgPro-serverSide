@@ -9,12 +9,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateRentStatus = exports.getAllUsers = exports.registeration = exports.tokenGenerate = void 0;
+exports.editedUser = exports.updateRentStatus = exports.getAllUsers = exports.registeration = exports.tokenGenerate = void 0;
 const auth_1 = require("../controller/auth");
 const db_1 = require("../db");
 const tokenGenerate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let token = (0, auth_1.generateToken)({ userId: req.userId });
-    res.json(token);
+    try {
+        let token = (0, auth_1.generateToken)({ userId: req.userId });
+        res.json(token);
+    }
+    catch (err) {
+        console.log("==========", err);
+    }
 });
 exports.tokenGenerate = tokenGenerate;
 const registeration = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -38,8 +43,6 @@ const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 });
 exports.getAllUsers = getAllUsers;
 const updateRentStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let value = req.body.value;
-    console.log("value====", value);
     try {
         let rentstatus = yield (0, db_1.insertRentStatus)(req.body.value);
         res.json(rentstatus);
@@ -49,3 +52,13 @@ const updateRentStatus = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.updateRentStatus = updateRentStatus;
+const editedUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let updateusr = yield (0, db_1.updateUser)(req.body.value);
+        res.json(updateusr);
+    }
+    catch (err) {
+        console.log("==========", err);
+    }
+});
+exports.editedUser = editedUser;

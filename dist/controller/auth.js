@@ -26,7 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authorize = exports.verifyToken = exports.generateToken = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 function generateToken(data) {
-    return jwt.sign(data, process.env.JWT_SECRET, { expiresIn: '24h' });
+    return jwt.sign(data, process.env.JWT_SECRET, { expiresIn: '1h' });
 }
 exports.generateToken = generateToken;
 function verifyToken(token) {

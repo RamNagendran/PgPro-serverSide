@@ -1,9 +1,9 @@
-import express from "express";
-import {getRegisteredUser, newRegisteration} from "./db";
 import cors from 'cors';
+import express from "express";
 import dotenv, {parse} from 'dotenv';
 import {authorize} from "./controller/auth";
-import {getAllUsers, registeration, tokenGenerate, updateRentStatus} from "./functions";
+import {getRegisteredUser, newRegisteration, updateUser} from "./db";
+import {editedUser, getAllUsers, registeration, tokenGenerate, updateRentStatus} from "./functions";
 
 dotenv.config();
 
@@ -16,6 +16,7 @@ app.use(express.json());
 app.post("/auth", tokenGenerate);
 app.post("/register/newUser", authorize, registeration)
 app.get("/getallUser", authorize, getAllUsers)
+app.post("/updateUser", authorize, editedUser)
 app.post("/update/rentStatus", authorize, updateRentStatus)
 
 // ----------------------------------------------------------------||

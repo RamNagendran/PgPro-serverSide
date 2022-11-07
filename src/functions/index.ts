@@ -1,10 +1,14 @@
 import {generateToken} from "../controller/auth"
-import {getRegisteredUser, insertRentStatus, newRegisteration} from "../db"
+import {getRegisteredUser, insertRentStatus, newRegisteration, updateUser} from "../db"
 
 
 export const tokenGenerate = async(req:any, res:any) => {
-    let token = generateToken({userId: req.userId})
-    res.json(token)
+    try {
+        let token = generateToken({userId: req.userId})
+        res.json(token)
+    } catch (err) {
+        console.log("==========", err)
+    }
 }
 
 export const registeration = async(req:any, res:any) => {
@@ -26,12 +30,19 @@ export const getAllUsers = async(req:any, res:any) => {
 }
 
 export const updateRentStatus = async(req:any, res:any) => {
-    let value = req.body.value
     try {
         let rentstatus = await insertRentStatus(req.body.value);
         res.json(rentstatus)
     } catch (err) {
         console.log("========", err);
-        
+    }
+}
+
+export const editedUser = async(req:any, res:any) => {
+    try {
+        let updateusr = await updateUser(req.body.value)
+        res.json(updateusr)
+    } catch(err) {
+        console.log("==========", err)
     }
 }

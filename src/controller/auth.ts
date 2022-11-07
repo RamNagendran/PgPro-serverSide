@@ -2,7 +2,7 @@ import {NextFunction, Request, Response} from 'express';
 import * as jwt from 'jsonwebtoken';
 
 export function generateToken(data: any) {
-    return jwt.sign(data, process.env.JWT_SECRET!, {expiresIn: '24h'});
+    return jwt.sign(data, process.env.JWT_SECRET!, {expiresIn: '1h'});
 }
 
 export function verifyToken(token: string) {
