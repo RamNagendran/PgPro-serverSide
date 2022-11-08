@@ -1,5 +1,5 @@
 import {generateToken} from "../controller/auth"
-import {getRegisteredUser, insertRentStatus, newRegisteration, updateUser} from "../db"
+import {getRegisteredUser, insertRentStatus, newRegisteration, setVaccatedUser, updateUser} from "../db"
 
 
 export const tokenGenerate = async(req:any, res:any) => {
@@ -42,6 +42,15 @@ export const editedUser = async(req:any, res:any) => {
     try {
         let updateusr = await updateUser(req.body.value)
         res.json(updateusr)
+    } catch(err) {
+        console.log("==========", err)
+    }
+}
+
+export const vaccateUser = async(req:any, res:any) => {
+    try {
+        let vaccate_user = await setVaccatedUser(req.body.value)
+        res.json("user Vaccated")
     } catch(err) {
         console.log("==========", err)
     }

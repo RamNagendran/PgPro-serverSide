@@ -57,7 +57,8 @@ export async function newRegisteration(data: regDetails) {
                 data?.contact_details?.email_id,
                 data?.personal_info?.uploadedImg
             ]);
-        let rent_status_id_update = pool.query(`INSERT INTO rent_status (user_id, monthly_rent_details) VALUES ($1, $2) RETURNING *`, [id, []])
+            let emp_arr:any = [];
+        let rent_status_id_update = pool.query(`INSERT INTO rent_status (user_id, monthly_rent_details) VALUES ($1, $2) RETURNING *`, [id, emp_arr])
         return result.rows;
     } catch (err) {
         console.log("================>", err)
@@ -139,7 +140,7 @@ export async function insertRentStatus(value: any) {
         let monthdata = value?.monthly_update
         const result3 = await pool.query(`
             UPDATE rent_status set balance_amt=($1), 
-            monthly_rent_details = monthly_rent_details || '{"Month": "${monthdata?.month}", "Status": "Paid"}'::jsonb 
+            monthly_rent_details = monthly_rent_details || '[{"Month": "${monthdata?.month}", "Status": "Paid"}]'::jsonb 
             WHERE user_id=($2)`,
             [
                 value?.balance_amt,
@@ -149,5 +150,14 @@ export async function insertRentStatus(value: any) {
         return result1.rows;
     } catch (err) {
         console.log("----------", err);
+    }
+}
+
+export async function setVaccatedUser(value:any) {
+    try {
+        const result = await pool.query(`UPDATE register_info set vaccated=($1) WHERE id=($2)`, [true, value?.id])
+        return result.rows;
+    } catch(err) {
+        console.log("==========", err)
     }
 }

@@ -3,7 +3,7 @@ import express from "express";
 import dotenv, {parse} from 'dotenv';
 import {authorize} from "./controller/auth";
 import {getRegisteredUser, newRegisteration, updateUser} from "./db";
-import {editedUser, getAllUsers, registeration, tokenGenerate, updateRentStatus} from "./functions";
+import {editedUser, getAllUsers, registeration, tokenGenerate, updateRentStatus, vaccateUser} from "./functions";
 
 dotenv.config();
 
@@ -18,6 +18,7 @@ app.post("/register/newUser", authorize, registeration)
 app.get("/getallUser", authorize, getAllUsers)
 app.post("/updateUser", authorize, editedUser)
 app.post("/update/rentStatus", authorize, updateRentStatus)
+app.post("/vaccateUser", authorize, vaccateUser)
 
 // ----------------------------------------------------------------||
 app.listen(5000, () => {
