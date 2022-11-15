@@ -161,3 +161,41 @@ export async function setVaccatedUser(value:any) {
         console.log("==========", err)
     }
 }
+
+export async function getRooms_details() {
+    try {
+        const result = await pool.query(`select * from room_info`)
+        return result.rows;
+    } catch(err) {
+        console.log("======", err);
+    }
+}
+
+export async function insertingRoom(value:any) {
+    try {
+        const result = await pool.query(`INSERT INTO room_info (room_no, total_beds) VALUES ($1, $2) RETURNING *`, [value.room_num, value.total_beds])
+        return result.rows;
+    } catch (err) {
+        console.log("======", err);
+        
+    }
+}
+
+export async function roomNoWithId() {
+    try {
+        const result = await pool.query(`SELECT id, first_name, last_name, rent_status, joining_date, room_no FROM register_info`)
+        return result.rows;
+    } catch(err) {
+        console.log("=========", err);
+    }
+}
+
+export async function updateBalance(value:any) {
+    try {
+        const result = await pool.query(`UPDATE rent_status set balance_amt=($1) WHERE user_id=($2)`, [value?.balance_amt, value?.user_id])
+        return result.rows
+    } catch(err) {
+        console.log("=======", err);
+        
+    }
+}

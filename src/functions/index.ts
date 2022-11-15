@@ -1,5 +1,5 @@
 import {generateToken} from "../controller/auth"
-import {getRegisteredUser, insertRentStatus, newRegisteration, setVaccatedUser, updateUser} from "../db"
+import {getRegisteredUser, getRooms_details, insertingRoom, insertRentStatus, newRegisteration, roomNoWithId, setVaccatedUser, updateBalance, updateUser} from "../db"
 
 
 export const tokenGenerate = async(req:any, res:any) => {
@@ -53,5 +53,42 @@ export const vaccateUser = async(req:any, res:any) => {
         res.json("user Vaccated")
     } catch(err) {
         console.log("==========", err)
+    }
+}
+
+export const roomInfo = async(req:any, res:any) => {
+    try {
+        let rooms = await getRooms_details()
+        res.json(rooms)
+    } catch(err) {
+        console.log("=======", err)
+    }
+}
+
+export const  addRoom = async(req:any, res:any) => {
+    try {
+        let insert = await insertingRoom(req.body.value)
+        res.json("room inserted sucessfully")
+    } catch (err) {
+        console.log("=======", err);
+    }
+}
+
+export const getUserRoomNo = async(req:any, res:any) => {
+    try {
+        const getuserRoom = await roomNoWithId()
+        res.json(getuserRoom)
+    } catch(err) {
+        console.log("========", err);
+        
+    }
+}
+
+export const updateBalance_amt = async(req:any, res:any) => {
+    try {
+        const editBalance = await updateBalance(req?.body?.value)
+        res.json(editBalance)
+    } catch(err) {
+        console.log("=========", err);
     }
 }
