@@ -13,7 +13,22 @@ export async function newRegisteration(data: regDetails) {
         state: data.contact_details.state,
         country: data.contact_details.country,
     }
-    let uploadedId_proofs = {id_proofs: data?.documentation?.uploaded}
+
+    let photo_id;
+
+    if (Object.keys(data?.personal_info?.uploadedImg).length > 0 && 
+    data?.personal_info?.uploadedImg.imgUrl !== null && data?.personal_info?.uploadedImg.imgName !== null) {
+        photo_id = data?.personal_info?.uploadedImg
+    } else {
+        photo_id = data?.personal_info?.captureImg
+    }
+
+    let uploadedId_proofs;
+    if (Array.isArray(data?.documentation?.uploaded) && data?.documentation?.uploaded?.length > 0) {
+        uploadedId_proofs = {id_proofs: data?.documentation?.uploaded}
+    } else {
+        uploadedId_proofs = {id_proofs:data?.documentation?.captureImg}
+    }
 
     const id = generateUniqueId({
         length: 20,
@@ -55,7 +70,7 @@ export async function newRegisteration(data: regDetails) {
                 data?.personal_info?.room_no,
                 data?.contact_details?.phone_no,
                 data?.contact_details?.email_id,
-                data?.personal_info?.uploadedImg
+                photo_id
             ]);
             let emp_arr:any = [];
         let rent_status_id_update = pool.query(`INSERT INTO rent_status (user_id, monthly_rent_details) VALUES ($1, $2) RETURNING *`, [id, emp_arr])
@@ -183,7 +198,7 @@ export async function insertingRoom(value:any) {
 
 export async function roomNoWithId() {
     try {
-        const result = await pool.query(`SELECT id, first_name, last_name, rent_status, joining_date, room_no FROM register_info`)
+        const result = await pool.query(`SELECT id, first_name, last_name, rent_status, joining_date, room_no, vaccated FROM register_info`)
         return result.rows;
     } catch(err) {
         console.log("=========", err);

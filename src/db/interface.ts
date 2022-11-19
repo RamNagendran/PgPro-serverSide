@@ -1,5 +1,6 @@
 export interface regDetails {
     personal_info: {
+        captureImg: any
         first_Name: string,
         last_Name: string,
         "father_Name": string,
@@ -33,7 +34,8 @@ export interface regDetails {
     professional_info: {},
     documentation: {
         adhar_no: string,
-        uploaded: {},
+        uploaded: any,
+        captureImg: any, 
         signData: string
     }
 }
