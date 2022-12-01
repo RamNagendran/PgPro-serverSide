@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editedUser = exports.updateRentStatus = exports.getAllUsers = exports.registeration = exports.tokenGenerate = void 0;
+exports.updateBalance_amt = exports.getUserRoomNo = exports.addRoom = exports.roomInfo = exports.vaccateUser = exports.editedUser = exports.updateRentStatus = exports.getAllUsers = exports.registeration = exports.tokenGenerate = void 0;
 const auth_1 = require("../controller/auth");
 const db_1 = require("../db");
 const tokenGenerate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -62,3 +62,54 @@ const editedUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.editedUser = editedUser;
+const vaccateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let vaccate_user = yield (0, db_1.setVaccatedUser)(req.body.value);
+        res.json("user Vaccated");
+    }
+    catch (err) {
+        console.log("==========", err);
+    }
+});
+exports.vaccateUser = vaccateUser;
+const roomInfo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let rooms = yield (0, db_1.getRooms_details)();
+        res.json(rooms);
+    }
+    catch (err) {
+        console.log("=======", err);
+    }
+});
+exports.roomInfo = roomInfo;
+const addRoom = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let insert = yield (0, db_1.insertingRoom)(req.body.value);
+        res.json("room inserted sucessfully");
+    }
+    catch (err) {
+        console.log("=======", err);
+    }
+});
+exports.addRoom = addRoom;
+const getUserRoomNo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const getuserRoom = yield (0, db_1.roomNoWithId)();
+        res.json(getuserRoom);
+    }
+    catch (err) {
+        console.log("========", err);
+    }
+});
+exports.getUserRoomNo = getUserRoomNo;
+const updateBalance_amt = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const editBalance = yield (0, db_1.updateBalance)((_a = req === null || req === void 0 ? void 0 : req.body) === null || _a === void 0 ? void 0 : _a.value);
+        res.json(editBalance);
+    }
+    catch (err) {
+        console.log("=========", err);
+    }
+});
+exports.updateBalance_amt = updateBalance_amt;
