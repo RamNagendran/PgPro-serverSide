@@ -4,7 +4,14 @@ const generateUniqueId = require('generate-unique-id');
 
 const pool = new Pool();
 
-export async function newRegisteration(data: regDetails) {
+export async function newRegisteration(data: regDetails, mansionType: any) {
+
+    let tablename = mansionType === "svh_mansion_1" ? `svh1_register_info` :
+        mansionType === "svh_mansion_2" ? `svh2_register_info` : `svh3_register_info`
+
+    let rent_status_table = mansionType === "svh_mansion_1" ? `svh1_rent_status` :
+        mansionType === "svh_mansion_2" ? `svh2_rent_status` : `svh3_rent_status`
+
     let address = {
         houseNo_streetName: data.contact_details.houseNo_streetName,
         city_village_name: data.contact_details.city_village_name,
@@ -16,8 +23,8 @@ export async function newRegisteration(data: regDetails) {
 
     let photo_id;
 
-    if (Object.keys(data?.personal_info?.uploadedImg).length > 0 && 
-    data?.personal_info?.uploadedImg.imgUrl !== null && data?.personal_info?.uploadedImg.imgName !== null) {
+    if (Object.keys(data?.personal_info?.uploadedImg).length > 0 &&
+        data?.personal_info?.uploadedImg.imgUrl !== null && data?.personal_info?.uploadedImg.imgName !== null) {
         photo_id = data?.personal_info?.uploadedImg
     } else {
         photo_id = data?.personal_info?.captureImg
@@ -27,7 +34,7 @@ export async function newRegisteration(data: regDetails) {
     if (Array.isArray(data?.documentation?.uploaded) && data?.documentation?.uploaded?.length > 0) {
         uploadedId_proofs = {id_proofs: data?.documentation?.uploaded}
     } else {
-        uploadedId_proofs = {id_proofs:data?.documentation?.captureImg}
+        uploadedId_proofs = {id_proofs: data?.documentation?.captureImg}
     }
 
     const id = generateUniqueId({
@@ -38,7 +45,7 @@ export async function newRegisteration(data: regDetails) {
     });
 
     try {
-        const result = await pool.query(`INSERT INTO register_info 
+        const result = await pool.query(`INSERT INTO ${tablename} 
         (id, first_name, 
         last_name, 
         father_name, 
@@ -72,8 +79,8 @@ export async function newRegisteration(data: regDetails) {
                 data?.contact_details?.email_id,
                 photo_id
             ]);
-            let emp_arr:any = [];
-        let rent_status_id_update = pool.query(`INSERT INTO rent_status (user_id, monthly_rent_details) VALUES ($1, $2) RETURNING *`, [id, emp_arr])
+        let emp_arr: any = [];
+        let rent_status_id_update = pool.query(`INSERT INTO ${rent_status_table} (user_id, monthly_rent_details) VALUES ($1, $2) RETURNING *`, [ id, emp_arr ])
         return result.rows;
     } catch (err) {
         console.log("================>", err)
@@ -81,9 +88,15 @@ export async function newRegisteration(data: regDetails) {
     }
 }
 
-export async function getRegisteredUser() {
+export async function getRegisteredUser(mansionType: any) {
+    let tablename = mansionType === "svh_mansion_1" ? `svh1_register_info` :
+        mansionType === "svh_mansion_2" ? `svh2_register_info` : `svh3_register_info`
+
+    let rent_status_table = mansionType === "svh_mansion_1" ? `svh1_rent_status` :
+        mansionType === "svh_mansion_2" ? `svh2_rent_status` : `svh3_rent_status`
+
     try {
-        const result = await pool.query(`select * from register_info INNER JOIN rent_status on register_info.id = rent_status.user_id`)
+        const result = await pool.query(`select * from ${tablename} INNER JOIN ${rent_status_table} on ${tablename}.id = ${rent_status_table}.user_id`)
         return result.rows;
     } catch (e) {
         console.log("================>", e)
@@ -91,7 +104,11 @@ export async function getRegisteredUser() {
     }
 }
 
-export async function updateUser(value: any) {
+export async function updateUser(value: any, mansionType: any) {
+
+    let tablename = mansionType === "svh_mansion_1" ? `svh1_register_info` :
+        mansionType === "svh_mansion_2" ? `svh2_register_info` : `svh3_register_info`
+
     let data = value?.data
     let user_id = value?.usr_id
     let address = {
@@ -105,7 +122,7 @@ export async function updateUser(value: any) {
     let uploadedId_proofs = {id_proofs: data?.documentation?.uploaded}
     try {
         const result = await pool.query(`
-            UPDATE register_info set 
+            UPDATE ${tablename} set 
                 first_name=($1), 
                 last_name=($2), 
                 father_name=($3), 
@@ -149,12 +166,19 @@ export async function updateUser(value: any) {
     }
 }
 
-export async function insertRentStatus(value: any) {
+export async function insertRentStatus(value: any, mansionType:any) {
+
+    let tablename = mansionType === "svh_mansion_1" ? `svh1_register_info` :
+        mansionType === "svh_mansion_2" ? `svh2_register_info` : `svh3_register_info`
+
+    let rent_status_table = mansionType === "svh_mansion_1" ? `svh1_rent_status` :
+        mansionType === "svh_mansion_2" ? `svh2_rent_status` : `svh3_rent_status`;
+
     try {
-        const result1 = await pool.query(`UPDATE register_info set rent_status=($1) WHERE id=($2)`, [value?.status, value?.id])
+        const result1 = await pool.query(`UPDATE ${tablename} set rent_status=($1) WHERE id=($2)`, [ value?.status, value?.id ])
         let monthdata = value?.monthly_update
         const result3 = await pool.query(`
-            UPDATE rent_status set balance_amt=($1), 
+            UPDATE ${rent_status_table} set balance_amt=($1), 
             monthly_rent_details = monthly_rent_details || '[{"Month": "${monthdata?.month}", "Status": "Paid"}]'::jsonb 
             WHERE user_id=($2)`,
             [
@@ -168,49 +192,114 @@ export async function insertRentStatus(value: any) {
     }
 }
 
-export async function setVaccatedUser(value:any) {
+export async function setVaccatedUser(value: any, mansionType:any) {
+
+    let tablename = mansionType === "svh_mansion_1" ? `svh1_register_info` :
+    mansionType === "svh_mansion_2" ? `svh2_register_info` : `svh3_register_info`
+
     try {
-        const result = await pool.query(`UPDATE register_info set vaccated=($1) WHERE id=($2)`, [true, value?.id])
+        const result = await pool.query(`UPDATE ${tablename} set vaccated=($1) WHERE id=($2)`, [ true, value?.id ])
         return result.rows;
-    } catch(err) {
+    } catch (err) {
         console.log("==========", err)
     }
 }
 
-export async function getRooms_details() {
-    try {
-        const result = await pool.query(`select * from room_info`)
-        return result.rows;
-    } catch(err) {
-        console.log("======", err);
-    }
-}
+export async function getRooms_details(mansionType: any) {
 
-export async function insertingRoom(value:any) {
+    let tablename = mansionType === "svh_mansion_1" ? `svh1_room_info` :
+        mansionType === "svh_mansion_2" ? `svh2_room_info` : `svh3_room_info`;
+
     try {
-        const result = await pool.query(`INSERT INTO room_info (room_no, total_beds) VALUES ($1, $2) RETURNING *`, [value.room_num, value.total_beds])
+        const result = await pool.query(`select * from ${tablename}`)
         return result.rows;
     } catch (err) {
         console.log("======", err);
-        
     }
 }
 
-export async function roomNoWithId() {
+export async function insertingRoom(value: any, mansionType: any) {
+
+    let tablename = mansionType === "svh_mansion_1" ? `svh1_room_info` :
+        mansionType === "svh_mansion_2" ? `svh2_room_info` : `svh3_room_info`;
+
     try {
-        const result = await pool.query(`SELECT id, first_name, last_name, rent_status, joining_date, room_no, vaccated FROM register_info`)
+        const result = await pool.query(`INSERT INTO ${tablename} (room_no, total_beds) VALUES ($1, $2) RETURNING *`, [ value.room_num, value.total_beds ])
         return result.rows;
-    } catch(err) {
+    } catch (err) {
+        console.log("======", err);
+
+    }
+}
+
+export async function roomNoWithId(mansionType: any) {
+    let tablename = mansionType === "svh_mansion_1" ? `svh1_register_info` :
+        mansionType === "svh_mansion_2" ? `svh2_register_info` : `svh3_register_info`
+    try {
+        const result = await pool.query(`SELECT id, first_name, last_name, rent_status, joining_date, room_no, vaccated FROM ${tablename}`)
+        return result.rows;
+    } catch (err) {
         console.log("=========", err);
     }
 }
 
-export async function updateBalance(value:any) {
+export async function updateBalance(value: any, mansionType:any) {
+    
+    let rent_status_table = mansionType === "svh_mansion_1" ? `svh1_rent_status` :
+        mansionType === "svh_mansion_2" ? `svh2_rent_status` : `svh3_rent_status`;
+
     try {
-        const result = await pool.query(`UPDATE rent_status set balance_amt=($1) WHERE user_id=($2)`, [value?.balance_amt, value?.user_id])
+        const result = await pool.query(`UPDATE ${rent_status_table} set balance_amt=($1) WHERE user_id=($2)`, [ value?.balance_amt, value?.user_id ])
         return result.rows
-    } catch(err) {
+    } catch (err) {
         console.log("=======", err);
-        
     }
 }
+
+export async function updateExpense(value: any, mansionType:any) {
+
+    let tablename = mansionType === "svh_mansion_1" ? `svh1_expense_records` :
+    mansionType === "svh_mansion_2" ? `svh2_expense_records` : `svh3_expense_records`
+
+    let bills_img;
+    if (Array.isArray(value?.uploaded) && value?.uploaded?.length > 0) {
+        bills_img = {id_proofs: value?.uploaded}
+    } else {
+        bills_img = {id_proofs: value?.captureImg}
+    }
+
+    try {
+        const result = await pool.query(`
+        INSERT INTO ${tablename} 
+        (
+            date, 
+            category,
+            notes, 
+            bills_img, 
+            amount
+        ) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+            [
+                value.date,
+                value.category,
+                value.notes,
+                bills_img,
+                value.amount
+            ])
+    } catch (err) {
+        console.log("=========", err);
+
+    }
+}
+
+export async function getExpDet(mansionType: any) {
+
+    let tablename = mansionType === "svh_mansion_1" ? `svh1_expense_records` :
+        mansionType === "svh_mansion_2" ? `svh2_expense_records` : `svh3_expense_records`
+
+    try {
+        const result = await pool.query(`SELECT * from ${tablename}`)
+        return result.rows
+    } catch (err) {
+        console.log("======", err);
+    }
+}  
