@@ -1,6 +1,6 @@
 import cors from 'cors';
 import express from "express";
-import dotenv, {parse} from 'dotenv';
+import dotenv from 'dotenv';
 import {authorize} from "./controller/auth";
 import {getRegisteredUser, newRegisteration, updateUser} from "./db";
 import {addRoom, allExpRecords, editedUser, getAllUsers, getUserRoomNo, insertExpRecord, registeration, roomInfo, tokenGenerate, updateBalance_amt, updateRentStatus, vaccateUser} from "./functions";
@@ -8,7 +8,7 @@ import {addRoom, allExpRecords, editedUser, getAllUsers, getUserRoomNo, insertEx
 dotenv.config();
 
 const app = express();
-app.use(cors())
+app.use(cors());
 
 // fixing "413 Request Entity Too Large" errors
 app.use(express.json({limit: "10mb"}))
