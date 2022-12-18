@@ -4,15 +4,9 @@ const generateUniqueId = require('generate-unique-id');
 
 const pool = new Pool;
 
-export async function newRegisteration(data: regDetails, mansionType: any) {
+export async function newRegisteration(data: regDetails, mansionNum: any) {
 
     const client = await pool.connect()
-
-    let tablename = mansionType === "svh_mansion_1" ? `svh1_register_info` :
-        mansionType === "svh_mansion_2" ? `svh2_register_info` : `svh3_register_info`
-
-    let rent_status_table = mansionType === "svh_mansion_1" ? `svh1_rent_status` :
-        mansionType === "svh_mansion_2" ? `svh2_rent_status` : `svh3_rent_status`
 
     let address = {
         houseNo_streetName: data.contact_details.houseNo_streetName,
@@ -47,7 +41,7 @@ export async function newRegisteration(data: regDetails, mansionType: any) {
     });
 
     try {
-        const result = await client.query(`INSERT INTO ${tablename} 
+        const result = await client.query(`INSERT INTO hostel${parseInt(mansionNum)}_register_info 
         (id, first_name, 
         last_name, 
         father_name, 
@@ -82,7 +76,8 @@ export async function newRegisteration(data: regDetails, mansionType: any) {
                 photo_id
             ]);
         let emp_arr: any = [];
-        let rent_status_id_update = client.query(`INSERT INTO ${rent_status_table} (user_id, monthly_rent_details) VALUES ($1, $2) RETURNING *`, [ id, emp_arr ])
+        let rent_status_id_update = client.query(`INSERT INTO hostel${parseInt(mansionNum)}_rent_status (user_id, monthly_rent_details) VALUES ($1, $2) RETURNING *`, [ id, emp_arr ])
+        await client.release();
         return result.rows;
     } catch (err) {
         console.log("================>", err)
@@ -90,16 +85,13 @@ export async function newRegisteration(data: regDetails, mansionType: any) {
     }
 }
 
-export async function getRegisteredUser(mansionType: any) {
+export async function getRegisteredUser(mansionNum: any) {
+    
     const client = await pool.connect();
-    let tablename = mansionType === "svh_mansion_1" ? `svh1_register_info` :
-        mansionType === "svh_mansion_2" ? `svh2_register_info` : `svh3_register_info`
-
-    let rent_status_table = mansionType === "svh_mansion_1" ? `svh1_rent_status` :
-        mansionType === "svh_mansion_2" ? `svh2_rent_status` : `svh3_rent_status`
 
     try {
-        const result = await client.query(`select * from ${tablename} INNER JOIN ${rent_status_table} on ${tablename}.id = ${rent_status_table}.user_id`)
+        const result = await client.query(`select * from hostel${parseInt(mansionNum)}_register_info INNER JOIN hostel${parseInt(mansionNum)}_rent_status on hostel${parseInt(mansionNum)}_register_info.id = hostel${parseInt(mansionNum)}_rent_status.user_id`)
+        await client.release();
         return result.rows;
     } catch (e) {
         console.log("================>", e)
@@ -107,10 +99,8 @@ export async function getRegisteredUser(mansionType: any) {
     }
 }
 
-export async function updateUser(value: any, mansionType: any) {
+export async function updateUser(value: any, mansionNum: any) {
     const client = await pool.connect()
-    let tablename = mansionType === "svh_mansion_1" ? `svh1_register_info` :
-        mansionType === "svh_mansion_2" ? `svh2_register_info` : `svh3_register_info`
 
     let data = value?.data
     let user_id = value?.usr_id
@@ -125,7 +115,7 @@ export async function updateUser(value: any, mansionType: any) {
     let uploadedId_proofs = {id_proofs: data?.documentation?.uploaded}
     try {
         const result = await client.query(`
-            UPDATE ${tablename} set 
+            UPDATE hostel${parseInt(mansionNum)}_register_info set 
                 first_name=($1), 
                 last_name=($2), 
                 father_name=($3), 
@@ -163,27 +153,22 @@ export async function updateUser(value: any, mansionType: any) {
             user_id
         ]
         )
+        await client.release();
         return result.rows;
     } catch (err) {
         console.log("=======", err)
     }
 }
 
-export async function insertRentStatus(value: any, mansionType:any) {
+export async function insertRentStatus(value: any, mansionNum:any) {
 
     const client = await pool.connect()
 
-    let tablename = mansionType === "svh_mansion_1" ? `svh1_register_info` :
-        mansionType === "svh_mansion_2" ? `svh2_register_info` : `svh3_register_info`
-
-    let rent_status_table = mansionType === "svh_mansion_1" ? `svh1_rent_status` :
-        mansionType === "svh_mansion_2" ? `svh2_rent_status` : `svh3_rent_status`;
-
     try {
-        const result1 = await client.query(`UPDATE ${tablename} set rent_status=($1) WHERE id=($2)`, [ value?.status, value?.id ])
+        const result1 = await client.query(`UPDATE hostel${parseInt(mansionNum)}_register_info set rent_status=($1) WHERE id=($2)`, [ value?.status, value?.id ])
         let monthdata = value?.monthly_update
         const result3 = await client.query(`
-            UPDATE ${rent_status_table} set balance_amt=($1), 
+            UPDATE hostel${parseInt(mansionNum)}_rent_status set balance_amt=($1), 
             monthly_rent_details = monthly_rent_details || '[{"Month": "${monthdata?.month}", "Status": "Paid"}]'::jsonb 
             WHERE user_id=($2)`,
             [
@@ -191,51 +176,46 @@ export async function insertRentStatus(value: any, mansionType:any) {
                 value?.id
             ]
         )
+        await client.release();
         return result1.rows;
     } catch (err) {
         console.log("----------", err);
     }
 }
 
-export async function setVaccatedUser(value: any, mansionType:any) {
+export async function setVaccatedUser(value: any, mansionNum:any) {
 
     const client = await pool.connect()
 
-    let tablename = mansionType === "svh_mansion_1" ? `svh1_register_info` :
-    mansionType === "svh_mansion_2" ? `svh2_register_info` : `svh3_register_info`
-
     try {
-        const result = await client.query(`UPDATE ${tablename} set vaccated=($1) WHERE id=($2)`, [ true, value?.id ])
+        const result = await client.query(`UPDATE hostel${parseInt(mansionNum)}_register_info set vaccated=($1) WHERE id=($2)`, [ true, value?.id ])
+        await client.release();
         return result.rows;
     } catch (err) {
         console.log("==========", err)
     }
 }
 
-export async function getRooms_details(mansionType: any) {
+export async function getRooms_details(mansionNum: any) {
 
     const client = await pool.connect()
 
-    let tablename = mansionType === "svh_mansion_1" ? `svh1_room_info` :
-        mansionType === "svh_mansion_2" ? `svh2_room_info` : `svh3_room_info`;
-
     try {
-        const result = await client.query(`select * from ${tablename}`)
+        const result = await client.query(`select * from hostel${parseInt(mansionNum)}_room_info`)
+        await client.release();
         return result.rows;
     } catch (err) {
         console.log("======", err);
     }
 }
 
-export async function insertingRoom(value: any, mansionType: any) {
+export async function insertingRoom(value: any, mansionNum: any) {
 
     const client = await pool.connect()
 
-    let tablename = mansionType === "svh_mansion_1" ? `svh1_room_info` :
-        mansionType === "svh_mansion_2" ? `svh2_room_info` : `svh3_room_info`;
-
     try {
-        const result = await client.query(`INSERT INTO ${tablename} (room_no, total_beds) VALUES ($1, $2) RETURNING *`, [ value.room_num, value.total_beds ])
+        const result = await client.query(`INSERT INTO hostel${parseInt(mansionNum)}_room_info (room_no, total_beds) VALUES ($1, $2) RETURNING *`, [ value.room_num, value.total_beds ])
+        await client.release();
         return result.rows;
     } catch (err) {
         console.log("======", err);
@@ -243,41 +223,35 @@ export async function insertingRoom(value: any, mansionType: any) {
     }
 }
 
-export async function roomNoWithId(mansionType: any) {
+export async function roomNoWithId(mansionNum: any) {
 
     const client = await pool.connect()
 
-    let tablename = mansionType === "svh_mansion_1" ? `svh1_register_info` :
-        mansionType === "svh_mansion_2" ? `svh2_register_info` : `svh3_register_info`
     try {
-        const result = await client.query(`SELECT id, first_name, last_name, rent_status, joining_date, room_no, vaccated FROM ${tablename}`)
+        const result = await client.query(`SELECT id, first_name, last_name, rent_status, joining_date, room_no, vaccated FROM hostel${parseInt(mansionNum)}_register_info`)
+        await client.release();
         return result.rows;
     } catch (err) {
         console.log("=========", err);
     }
 }
 
-export async function updateBalance(value: any, mansionType:any) {
+export async function updateBalance(value: any, mansionNum:any) {
 
     const client = await pool.connect()
     
-    let rent_status_table = mansionType === "svh_mansion_1" ? `svh1_rent_status` :
-        mansionType === "svh_mansion_2" ? `svh2_rent_status` : `svh3_rent_status`;
-
     try {
-        const result = await client.query(`UPDATE ${rent_status_table} set balance_amt=($1) WHERE user_id=($2)`, [ value?.balance_amt, value?.user_id ])
+        const result = await client.query(`UPDATE hostel${parseInt(mansionNum)}_rent_status set balance_amt=($1) WHERE user_id=($2)`, [ value?.balance_amt, value?.user_id ])
+        await client.release();
         return result.rows
     } catch (err) {
         console.log("=======", err);
     }
 }
 
-export async function updateExpense(value: any, mansionType:any) {
+export async function updateExpense(value: any, mansionNum:any) {
 
     const client = await pool.connect()
-
-    let tablename = mansionType === "svh_mansion_1" ? `svh1_expense_records` :
-    mansionType === "svh_mansion_2" ? `svh2_expense_records` : `svh3_expense_records`
 
     let bills_img;
     if (Array.isArray(value?.uploaded) && value?.uploaded?.length > 0) {
@@ -288,7 +262,7 @@ export async function updateExpense(value: any, mansionType:any) {
 
     try {
         const result = await client.query(`
-        INSERT INTO ${tablename} 
+        INSERT INTO hostel${parseInt(mansionNum)}_expense_records 
         (
             date, 
             category,
@@ -303,21 +277,20 @@ export async function updateExpense(value: any, mansionType:any) {
                 bills_img,
                 value.amount
             ])
+        await client.release();
     } catch (err) {
         console.log("=========", err);
 
     }
 }
 
-export async function getExpDet(mansionType: any) {
+export async function getExpDet(mansionNum: any) {
 
     const client = await pool.connect()
 
-    let tablename = mansionType === "svh_mansion_1" ? `svh1_expense_records` :
-        mansionType === "svh_mansion_2" ? `svh2_expense_records` : `svh3_expense_records`
-
     try {
-        const result = await client.query(`SELECT * from ${tablename}`)
+        const result = await client.query(`SELECT * from hostel${parseInt(mansionNum)}_expense_records`)
+        await client.release();
         return result.rows
     } catch (err) {
         console.log("======", err);
