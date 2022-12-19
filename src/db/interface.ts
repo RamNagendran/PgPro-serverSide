@@ -37,6 +37,11 @@ export interface regDetails {
         uploaded: any,
         captureImg: any, 
         signData: string
+    },
+    payment_info : {
+        advance_amount : number,
+        // rent_amount: number,
+        // balance_amount : number
     }
 }
 

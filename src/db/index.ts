@@ -76,7 +76,7 @@ export async function newRegisteration(data: regDetails, mansionNum: any) {
                 photo_id
             ]);
         let emp_arr: any = [];
-        let rent_status_id_update = client.query(`INSERT INTO hostel${parseInt(mansionNum)}_rent_status (user_id, monthly_rent_details) VALUES ($1, $2) RETURNING *`, [ id, emp_arr ])
+        let rent_status_id_update = client.query(`INSERT INTO hostel${parseInt(mansionNum)}_rent_status (user_id, monthly_rent_details, advance_amt) VALUES ($1, $2, $3) RETURNING *`, [ id, emp_arr, data?.payment_info?.advance_amount ])
         await client.release();
         return result.rows;
     } catch (err) {
@@ -169,7 +169,7 @@ export async function insertRentStatus(value: any, mansionNum:any) {
         let monthdata = value?.monthly_update
         const result3 = await client.query(`
             UPDATE hostel${parseInt(mansionNum)}_rent_status set balance_amt=($1), 
-            monthly_rent_details = monthly_rent_details || '[{"Month": "${monthdata?.month}", "Status": "Paid"}]'::jsonb 
+            monthly_rent_details = monthly_rent_details || '[{"Month": "${monthdata?.month}", "rent_amount":${monthdata.rent_amount}}]'::jsonb 
             WHERE user_id=($2)`,
             [
                 value?.balance_amt,
